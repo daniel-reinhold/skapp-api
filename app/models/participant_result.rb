@@ -1,0 +1,2 @@
+class ParticipantResult < ApplicationRecord
+end
