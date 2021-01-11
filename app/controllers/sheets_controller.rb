@@ -1,51 +1,75 @@
 class SheetsController < ApplicationController
-  before_action :set_sheet, only: [:show, :update, :destroy]
+  before_action :set_user
+  before_action :set_sheet, only: [:update, :destroy]
 
-  # GET /sheets
+  # <editor-fold desc="Constants" defaultstate="collapsed">
+
+  DEFAULT_FIELDS = [:id, :title, :user_id]
+
+  # </editor-fold>
+
+  # <editor-fold desc="Actions" defaultstate="collapsed">
+
+  # GET /users/1/sheets
   def index
     @sheets = Sheet.all
 
-    render json: @sheets
+    render :json => @sheets.to_json(:only => DEFAULT_FIELDS), :status => OK
   end
 
-  # GET /sheets/1
-  def show
-    render json: @sheet
-  end
-
-  # POST /sheets
+  # POST /users/1/sheets/create
   def create
     @sheet = Sheet.new(sheet_params)
 
     if @sheet.save
-      render json: @sheet, status: :created, location: @sheet
+      render :json => @sheet.to_json(:only => DEFAULT_FIELDS), :status => CREATED
     else
-      render json: @sheet.errors, status: :unprocessable_entity
+      render :json => @sheet.errors, :status => UNPROCESSABLE_ENTITY
     end
   end
 
-  # PATCH/PUT /sheets/1
+  # PATCH /users/1/sheets/1/update
   def update
     if @sheet.update(sheet_params)
-      render json: @sheet
+      render :json => @sheet.to_json(:only => DEFAULT_FIELDS), :status => OK
     else
-      render json: @sheet.errors, status: :unprocessable_entity
+      render :json => @sheet.errors, :status => UNPROCESSABLE_ENTITY
     end
   end
 
-  # DELETE /sheets/1
+  # DELETE /users/1/sheets/1/delete
   def destroy
-    @sheet.destroy
+    if @sheet.destroy
+      render :json => {}, :status => NO_CONTENT
+    end
   end
+
+  # </editor-fold>
+
+  # <editor-fold desc="Private methods" defaultstate="collapsed">
 
   private
-    # Use callbacks to share common setup or constraints between actions.
-    def set_sheet
-      @sheet = Sheet.find(params[:id])
-    end
 
-    # Only allow a trusted parameter "white list" through.
-    def sheet_params
-      params.fetch(:sheet, {})
+  def set_sheet
+    begin
+      @sheet = Sheet.find(params[:id])
+    rescue
+      render :json => { :error => 'Sheet not found' }, :status => NOT_FOUND
     end
+  end
+
+  def set_user
+    begin
+      @user = User.find(params[:user_id])
+    rescue
+      render :json => { :error => 'User not found' }, :status => NOT_FOUND
+    end
+  end
+
+# Only allow a trusted parameter "white list" through.
+  def sheet_params
+    params.permit(:title, :user_id)
+  end
+
+  # </editor-fold>
 end

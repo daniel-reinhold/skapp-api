@@ -5,7 +5,7 @@ default: &default
 
 development:
   <<: *default
-  host: locahost
+  host: localhost
   database: skapp_development
   username: admin
   password: admin
